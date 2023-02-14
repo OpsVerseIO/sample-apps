@@ -2,7 +2,7 @@
   import { TracingInstrumentation } from '@grafana/faro-web-tracing';
   import { initializeFaro, getWebInstrumentations, LogLevel } from '@grafana/faro-web-sdk';
   
-  let value = "https://frontend-opsverse-venus.observe.devopsnow.cloud/collect";
+  let value = "https://<observe-now-frontend-collector-endpoint>.opsverse.cloud/collect";
 
   let faro = initializeFaro({
     url: value,
@@ -29,46 +29,12 @@
   const createTrace = () => {
     const span = tracer.startSpan('test-span');
     context.with(trace.setSpan(context.active(), span), () => {
-      //console.log("Inside a span!");
+      console.log("Inside a span!");
 
       setTimeout(() => {
-        //console.info(`This sample trace was generated at: ${ new Date().toLocaleString() }`); 
+        console.info(`This sample trace was generated at: ${ new Date().toLocaleString() }`);
         span.end() 
       }, 2000);
-    });
-  }
-
-  const processData = () => {
-    const span = tracer.startSpan('process-data');
-    context.with(trace.setSpan(context.active(), span), () => {
-      setTimeout(() => { alert("Processed User Action"); span.end();}, 1000)
-    });
-  }
-  
-  const getMoreData = () => {
-    const span = tracer.startSpan('get-more-data');
-    context.with(trace.setSpan(context.active(), span), () => {
-      fetch("http://localhost:5000/rolldice").then(
-        () =>  { processData(); 
-        span.end();
-        });
-    });
-  }
-  
-  const getData = () => {
-    const span = tracer.startSpan('get-data');
-    context.with(trace.setSpan(context.active(), span), () => {
-      fetch("http://localhost:5000/user_info").then(
-        () =>  { getMoreData() 
-        span.end();
-        });
-    });
-  }
-  const moveAround = () => {
-    const span = tracer.startSpan('user-action')
-    context.with(trace.setSpan(context.active(), span), () => {
-       getData();
-       span.end();
     });
   }
 
@@ -76,7 +42,7 @@
     throw new Error("Some Error Happened Here!")
   }
 
-  //setTimeout(moveAround,5000);
+  setTimeout(createTrace,5000);
 
 </script>
 
@@ -93,7 +59,6 @@
     
 <button on:click={createLog}>Generate Sample Log</button>
 <button on:click={createTrace}>Generate Sample Trace</button>
-<button on:click={moveAround}>Data Processing</button>
 <button on:click={generateError}>Generate Error</button>
   </div>
   <p class="text">
