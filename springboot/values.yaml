@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+   name: springboot-pod
+   labels:
+     app: springboot-pod
+spec:
+   containers:
+   - name: springboot-container
+     image: lifeofnavin/profiler-springboot-sample
+     ports:
+     - containerPort: 8080
