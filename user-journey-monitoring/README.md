@@ -73,3 +73,9 @@ The checkout path fails on purpose so there is drop-off and latency to observe:
 ```
 $ PAYMENT_FAILURE_RATE=0.3 SLOW_PAYMENT_RATE=0.2 npm run dev
 ```
+
+## Grafana dashboards
+
+`grafana/funnel.json` (funnel & KPIs) and `grafana/session-drilldown.json` (per-session timeline, traces, Web Vitals).
+Import via **Dashboards → New → Import** (or provisioning / the HTTP API). They expect data sources with
+UIDs `loki` (Loki), `metrics` (Prometheus-compatible) and `jaeger` (Jaeger).
