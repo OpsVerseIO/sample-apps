@@ -1,12 +1,14 @@
 import Link from "next/link";
+import { TrackJourneyStep } from "@/components/TrackJourneyStep";
 import { CATEGORIES, formatPrice, PRODUCTS } from "@/lib/products";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
-  const { category } = await searchParams;
+  const category = (await searchParams).category as string | undefined;
   const products = category ? PRODUCTS.filter((p) => p.category === category) : PRODUCTS;
 
   return (
     <>
+      <TrackJourneyStep key={category ?? "all"} step="browse" attributes={{ category: category ?? "all" }} />
       <h1>Shop</h1>
       <div className="filters">
         <Link href="/" className={!category ? "chip active" : "chip"}>

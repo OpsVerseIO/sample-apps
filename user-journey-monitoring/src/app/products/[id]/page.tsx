@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { TrackJourneyStep } from "@/components/TrackJourneyStep";
 import { formatPrice, getProduct } from "@/lib/products";
 
 export default async function ProductPage({ params }: PageProps<"/products/[id]">) {
@@ -10,6 +11,10 @@ export default async function ProductPage({ params }: PageProps<"/products/[id]"
 
   return (
     <article className="product">
+      <TrackJourneyStep
+        step="view_product"
+        attributes={{ product_id: product.id, category: product.category, price_usd: product.price / 100 }}
+      />
       <Link href="/" className="back">
         ← Back to shop
       </Link>

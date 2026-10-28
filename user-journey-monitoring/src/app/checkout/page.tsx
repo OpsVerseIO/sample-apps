@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/CartProvider";
+import { trackJourneyStep } from "@/lib/journey";
 import { formatPrice } from "@/lib/products";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -18,6 +19,13 @@ export default function CheckoutPage() {
   const { cart, loading, refresh } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const tracked = useRef(false);
+
+  useEffect(() => {
+    if (loading || tracked.current || cart.items.length === 0) return;
+    tracked.current = true;
+    trackJourneyStep("begin_checkout", "success", { item_count: cart.itemCount, cart_value_usd: cart.total / 100 });
+  }, [loading, cart]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,13 +47,20 @@ export default function CheckoutPage() {
         }),
       });
       const data = await res.json();
+      const cartValue = cart.total / 100;
       if (!res.ok) {
+        trackJourneyStep("place_order", "failure", {
+          error_reason: data.reason ?? data.error ?? `http_${res.status}`,
+          cart_value_usd: cartValue,
+        });
         setError(ERROR_MESSAGES[data.error] ?? "Something went wrong. Please try again.");
         return;
       }
+      trackJourneyStep("place_order", "success", { order_id: data.orderId, cart_value_usd: cartValue });
       await refresh();
       router.push(`/orders/${data.orderId}`);
     } catch {
+      trackJourneyStep("place_order", "failure", { error_reason: "network_error" });
       setError("Network error. Please try again.");
     } finally {
       setSubmitting(false);

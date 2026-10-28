@@ -9,14 +9,43 @@ Grafana dashboards.
 - Next.js 16 (App Router) + React 19 + TypeScript
 - In-memory backend (cart, orders, fake payment provider) via Next.js Route Handlers
 
+- Grafana Faro (browser) + OpenTelemetry Node SDK (server) -> OTel Collector (contrib)
+
 **How to run**
 
 ```
+$ cp .env.example .env            # set your ObserveNow collector endpoint + credentials
+$ docker compose up -d            # OTel Collector (add --profile local for a local Grafana stack)
 $ npm install
 $ npm run dev
 
-// Visit http://localhost:3000
+// Visit http://localhost:3000 and walk through a purchase
 ```
+
+## Telemetry flow
+
+```
+Browser ── Faro SDK ──(faro json)──► OTel Collector :8027  faro receiver ─┐
+Next.js ── OTel SDK ──(OTLP)───────► OTel Collector :4318  otlp receiver ─┤
+                                                                          ▼
+                    transform (parse Faro events) → count / spanmetrics connectors
+                                                                          ▼
+                                  upstream exporter(s) → ObserveNow / any OTLP backend
+```
+
+Faro does not speak OTLP, so the collector's `faro` receiver (contrib, alpha)
+translates it into OTLP logs (events, errors, Web Vitals) and traces.
+
+| Signal | Source | What you get |
+| --- | --- | --- |
+| `shop_journey_steps_total{journey_step,journey_outcome,journey_error_reason}` | Faro `journey_step` events → `count` connector | Funnel, drop-off, decline rates |
+| `traces_span_metrics_*` | All spans → `spanmetrics` connector | RED metrics per route / span |
+| `shop_checkout_attempts_total`, `shop_order_value`, `shop_payment_duration`, `shop_cart_additions_total` | Server OTel metrics | Business KPIs |
+| Logs with `session.id`, `journey.step` attributes | Faro → collector | Per-session drilldown |
+| Traces | Faro fetch spans + Next.js route spans (joined via `traceparent`) | Click → API → payment in one trace |
+
+Destination is controlled entirely by env vars in `.env` — see `.env.example`
+for OTLP gRPC / OTLP HTTP / Prometheus remote write options per signal.
 
 ## The user journey
 

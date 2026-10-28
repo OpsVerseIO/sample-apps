@@ -1,7 +1,9 @@
+import { trace } from "@opentelemetry/api";
 import { NextResponse, type NextRequest } from "next/server";
 import { resolveCartId, withCartCookie } from "@/lib/cart-cookie";
 import { getProduct } from "@/lib/products";
 import { addToCart, clearCart, getCart, setCartQuantity } from "@/lib/store";
+import { cartAdditions } from "@/lib/telemetry";
 
 export async function GET(request: NextRequest) {
   const { cartId, isNew } = resolveCartId(request);
@@ -16,7 +18,10 @@ export async function POST(request: NextRequest) {
   if (!getProduct(productId)) {
     return NextResponse.json({ error: "unknown_product" }, { status: 400 });
   }
-  addToCart(cartId, productId, Math.max(1, Number(quantity)));
+  const qty = Math.max(1, Number(quantity));
+  addToCart(cartId, productId, qty);
+  cartAdditions.add(qty, { "product.id": productId, "product.category": getProduct(productId)!.category });
+  trace.getActiveSpan()?.setAttributes({ "cart.id": cartId, "product.id": productId, "cart.quantity_added": qty });
   return withCartCookie(NextResponse.json(getCart(cartId)), cartId, isNew);
 }
 

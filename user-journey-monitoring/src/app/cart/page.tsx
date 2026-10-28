@@ -1,11 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { useCart } from "@/components/CartProvider";
+import { trackJourneyStep } from "@/lib/journey";
 import { formatPrice } from "@/lib/products";
 
 export default function CartPage() {
   const { cart, loading, setQuantity } = useCart();
+  const tracked = useRef(false);
+
+  useEffect(() => {
+    if (loading || tracked.current) return;
+    tracked.current = true;
+    trackJourneyStep("view_cart", "success", { item_count: cart.itemCount, cart_value_usd: cart.total / 100 });
+  }, [loading, cart]);
 
   if (loading) return <p>Loading cart…</p>;
 

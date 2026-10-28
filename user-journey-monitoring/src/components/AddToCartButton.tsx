@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackJourneyStep } from "@/lib/journey";
 import { useCart } from "./CartProvider";
 
 export function AddToCartButton({ productId }: { productId: string }) {
@@ -13,8 +14,10 @@ export function AddToCartButton({ productId }: { productId: string }) {
     try {
       await addItem(productId, quantity);
       setStatus("added");
+      trackJourneyStep("add_to_cart", "success", { product_id: productId, quantity });
     } catch {
       setStatus("error");
+      trackJourneyStep("add_to_cart", "failure", { product_id: productId, error_reason: "cart_api_error" });
     }
   }
 

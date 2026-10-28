@@ -1,0 +1,23 @@
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.164.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "4317:4317" # OTLP gRPC  (Next.js server)
+      - "4318:4318" # OTLP HTTP  (Next.js server)
+      - "8027:8027" # Faro       (browser)
+      - "13133:13133" # health check
+
+  # Optional all-in-one Grafana + Tempo + Loki + Prometheus for local testing.
+  #   docker compose --profile local up
+  # and set UPSTREAM_OTLP_ENDPOINT=lgtm:4317, UPSTREAM_OTLP_INSECURE=true in .env
+  lgtm:
+    image: grafana/otel-lgtm:latest
+    profiles: [local]
+    ports:
+      - "3001:3000" # Grafana (admin/admin)
