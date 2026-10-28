@@ -14,8 +14,8 @@ services:
       - "13133:13133" # health check
 
   # Optional all-in-one Grafana + Tempo + Loki + Prometheus for local testing.
+  # The collector sends here when UPSTREAM_OTLP_ENDPOINT is not set:
   #   docker compose --profile local up
-  # and set UPSTREAM_OTLP_ENDPOINT=lgtm:4317, UPSTREAM_OTLP_INSECURE=true in .env
   lgtm:
     image: grafana/otel-lgtm:latest
     profiles: [local]

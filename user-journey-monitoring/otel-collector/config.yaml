@@ -3,9 +3,10 @@
 #   Browser (Faro SDK)  --faro/json-->  receiver "faro"  :8027
 #   Next.js (OTel SDK)  --OTLP------->  receiver "otlp"  :4317 / :4318
 #
-# All destination settings come from env vars (see ../.env.example), and each
-# signal's exporters can be swapped without editing this file, e.g.
-#   METRICS_EXPORTERS=[prometheusremotewrite/upstream]
+# Everything is forwarded upstream over OTLP/HTTP. Set the destination in .env:
+#   UPSTREAM_OTLP_ENDPOINT, UPSTREAM_AUTHORIZATION (see ../.env.example).
+# Without .env it sends to the optional local Grafana stack
+# (docker compose --profile local up).
 
 receivers:
   faro:
@@ -114,30 +115,11 @@ connectors:
     resource_metrics_key_attributes: [service.name]
 
 exporters:
-  debug:
-    verbosity: ${env:DEBUG_VERBOSITY:-basic}
-
-  # Default upstream: OTLP gRPC (ObserveNow, Grafana Cloud, Tempo, ...)
-  otlp/upstream:
-    endpoint: ${env:UPSTREAM_OTLP_ENDPOINT:-localhost:4317}
-    headers:
-      Authorization: ${env:UPSTREAM_AUTHORIZATION:-}
-    tls:
-      insecure: ${env:UPSTREAM_OTLP_INSECURE:-false}
-
-  # Alternative: OTLP over HTTP
+  # ObserveNow, Grafana Cloud, or any OTLP/HTTP endpoint.
   otlphttp/upstream:
-    endpoint: ${env:UPSTREAM_OTLPHTTP_ENDPOINT:-http://localhost:4318}
+    endpoint: ${env:UPSTREAM_OTLP_ENDPOINT:-http://lgtm:4318}
     headers:
       Authorization: ${env:UPSTREAM_AUTHORIZATION:-}
-
-  # Alternative for metrics: Prometheus remote write (Prometheus/Mimir/VictoriaMetrics)
-  prometheusremotewrite/upstream:
-    endpoint: ${env:UPSTREAM_PRW_ENDPOINT:-http://localhost:9090/api/v1/write}
-    headers:
-      Authorization: ${env:UPSTREAM_AUTHORIZATION:-}
-    resource_to_telemetry_conversion:
-      enabled: true
 
 extensions:
   health_check:
@@ -149,7 +131,7 @@ service:
     traces:
       receivers: [otlp, faro]
       processors: [memory_limiter, batch]
-      exporters: ${env:TRACES_EXPORTERS:-[otlp/upstream]}
+      exporters: [otlphttp/upstream]
 
     # Traces also feed spanmetrics (unbatched copy, before export).
     traces/spanmetrics:
@@ -160,7 +142,7 @@ service:
     logs:
       receivers: [otlp, faro]
       processors: [memory_limiter, transform/faro_events, batch]
-      exporters: ${env:LOGS_EXPORTERS:-[otlp/upstream]}
+      exporters: [otlphttp/upstream]
 
     logs/journey:
       receivers: [faro]
@@ -170,4 +152,4 @@ service:
     metrics:
       receivers: [otlp, spanmetrics, count/journey]
       processors: [memory_limiter, resource/collector_instance, deltatocumulative, batch]
-      exporters: ${env:METRICS_EXPORTERS:-[otlp/upstream]}
+      exporters: [otlphttp/upstream]

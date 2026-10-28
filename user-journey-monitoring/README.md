@@ -48,8 +48,10 @@ translates it into OTLP logs (events, errors, Web Vitals) and traces.
 | Logs with `session.id`, `journey.name`, `journey.step` attributes | Faro → collector | Per-session drilldown |
 | Traces | Faro fetch spans + Next.js route spans (joined via `traceparent`) | Click → API → payment in one trace |
 
-Destination is controlled entirely by env vars in `.env` — see `.env.example`
-for OTLP gRPC / OTLP HTTP / Prometheus remote write options per signal.
+The destination is set in `.env` — see `.env.example`: either through the local
+collector (option A) or straight to an ObserveNow Faro + OTLP endpoint (option B).
+Without `.env`, the collector sends to the optional local Grafana stack
+(`docker compose --profile local up`, Grafana on http://localhost:3001).
 
 ## The user journey
 
