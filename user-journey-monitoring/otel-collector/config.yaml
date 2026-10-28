@@ -79,20 +79,22 @@ processors:
           - merge_maps(cache, ParseKeyValue(body, "=", " "), "upsert")
           - set(attributes["event.name"], cache["event_name"])
           - set(attributes["event.domain"], cache["event_domain"])
+          - set(attributes["journey.name"], cache["event_data_journey"])
           - set(attributes["journey.step"], cache["event_data_step"])
           - set(attributes["journey.outcome"], cache["event_data_outcome"])
           - set(attributes["journey.error_reason"], cache["event_data_error_reason"])
 
 connectors:
-  # journey_step events -> shop.journey.steps counter (shop_journey_steps_total
-  # in Prometheus). Drives the funnel / drop-off / decline-rate panels.
+  # journey_step events -> journey.steps counter (journey_steps_total in
+  # Prometheus). Drives the funnel / drop-off / decline-rate panels.
   count/journey:
     logs:
-      shop.journey.steps:
-        description: User journey steps reached, by step and outcome
+      journey.steps:
+        description: User journey steps reached, by journey, step and outcome
         conditions:
           - attributes["event.name"] == "journey_step"
         attributes:
+          - key: journey.name
           - key: journey.step
           - key: journey.outcome
           - key: journey.error_reason

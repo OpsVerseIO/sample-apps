@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TrackJourneyStep } from "@/components/TrackJourneyStep";
+import { checkoutJourney } from "@/lib/journeys";
 import { formatPrice } from "@/lib/products";
 import { getOrder } from "@/lib/store";
+import { TrackJourneyStep } from "@/observability/journey-client";
 
 export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
   const { id } = await params;
@@ -11,7 +12,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
 
   return (
     <>
-      <TrackJourneyStep step="order_confirmed" attributes={{ order_id: order.id, order_value_usd: order.total / 100 }} />
+      <TrackJourneyStep journey={checkoutJourney} step="order_confirmed" attributes={{ order_id: order.id, order_value_usd: order.total / 100 }} />
       <h1>Thank you, {order.shipping.name}! 🎉</h1>
       <p>
         Order <code>{order.id}</code> is confirmed. A receipt is on its way to {order.shipping.email}.

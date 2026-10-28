@@ -46,7 +46,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range]))",
+          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range]))",
           "queryType": "instant",
           "legendFormat": "",
           "format": "table"
@@ -57,7 +57,7 @@
             "uid": "loki"
           },
           "refId": "B",
-          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_outcome=\"failure\" [$__range]))",
+          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_outcome=\"failure\" [$__range]))",
           "queryType": "instant",
           "legendFormat": "",
           "format": "table"
@@ -68,7 +68,7 @@
             "uid": "loki"
           },
           "refId": "C",
-          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"order_confirmed\" [$__range]))",
+          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" [$__range]))",
           "queryType": "instant",
           "legendFormat": "",
           "format": "table"
@@ -235,7 +235,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | session_id=\"$session\" [$__range]))",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | session_id=\"$session\" [$__range]))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -294,7 +294,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | session_id=\"$session\" | journey_outcome=\"failure\" [$__range]))",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | session_id=\"$session\" | journey_outcome=\"failure\" [$__range]))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -357,7 +357,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | session_id=\"$session\" | journey_step=\"order_confirmed\" [$__range]))",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | session_id=\"$session\" | journey_step=\"order_confirmed\" [$__range]))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -605,7 +605,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "{service_name=\"$app\"} | event_name=\"journey_step\" | session_id=\"$session\" | line_format \"{{.journey_step}}  {{ if eq .journey_outcome \\\"failure\\\" }}\u2717 FAILED ({{.journey_error_reason}}){{ else }}\u2713{{ end }}\"",
+          "expr": "{service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | session_id=\"$session\" | line_format \"{{.journey_step}}  {{ if eq .journey_outcome \\\"failure\\\" }}\u2717 FAILED ({{.journey_error_reason}}){{ else }}\u2713{{ end }}\"",
           "queryType": "range",
           "legendFormat": ""
         }
@@ -1071,6 +1071,18 @@
   ],
   "templating": {
     "list": [
+      {
+        "name": "journey",
+        "label": "Journey",
+        "type": "custom",
+        "query": "checkout",
+        "current": {
+          "text": "checkout",
+          "value": "checkout"
+        },
+        "options": [],
+        "hide": 0
+      },
       {
         "name": "app",
         "label": "App",

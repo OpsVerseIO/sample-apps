@@ -1,20 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 import { useCart } from "@/components/CartProvider";
-import { trackJourneyStep } from "@/lib/journey";
+import { checkoutJourney } from "@/lib/journeys";
 import { formatPrice } from "@/lib/products";
+import { useJourneyStep } from "@/observability/journey-client";
 
 export default function CartPage() {
   const { cart, loading, setQuantity } = useCart();
-  const tracked = useRef(false);
-
-  useEffect(() => {
-    if (loading || tracked.current) return;
-    tracked.current = true;
-    trackJourneyStep("view_cart", "success", { item_count: cart.itemCount, cart_value_usd: cart.total / 100 });
-  }, [loading, cart]);
+  useJourneyStep(checkoutJourney, "view_cart", {
+    when: !loading,
+    attributes: { item_count: cart.itemCount, cart_value_usd: cart.total / 100 },
+  });
 
   if (loading) return <p>Loading cart…</p>;
 

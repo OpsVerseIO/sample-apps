@@ -46,7 +46,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -105,7 +105,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"order_confirmed\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" [$__range])))",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -164,7 +164,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"order_confirmed\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))) * 100",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
           "queryType": "instant",
           "legendFormat": ""
         }
@@ -497,7 +497,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"browse\" | journey_outcome=\"success\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"browse\" | journey_outcome=\"success\" [$__range])))",
           "queryType": "instant",
           "legendFormat": "browse"
         },
@@ -507,7 +507,7 @@
             "uid": "loki"
           },
           "refId": "B",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"view_product\" | journey_outcome=\"success\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"view_product\" | journey_outcome=\"success\" [$__range])))",
           "queryType": "instant",
           "legendFormat": "view_product"
         },
@@ -517,7 +517,7 @@
             "uid": "loki"
           },
           "refId": "C",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"add_to_cart\" | journey_outcome=\"success\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"add_to_cart\" | journey_outcome=\"success\" [$__range])))",
           "queryType": "instant",
           "legendFormat": "add_to_cart"
         },
@@ -527,7 +527,7 @@
             "uid": "loki"
           },
           "refId": "D",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"view_cart\" | journey_outcome=\"success\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"view_cart\" | journey_outcome=\"success\" [$__range])))",
           "queryType": "instant",
           "legendFormat": "view_cart"
         },
@@ -537,7 +537,7 @@
             "uid": "loki"
           },
           "refId": "E",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"begin_checkout\" | journey_outcome=\"success\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"begin_checkout\" | journey_outcome=\"success\" [$__range])))",
           "queryType": "instant",
           "legendFormat": "begin_checkout"
         },
@@ -547,7 +547,7 @@
             "uid": "loki"
           },
           "refId": "F",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"place_order\" | journey_outcome=\"success\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"place_order\" | journey_outcome=\"success\" [$__range])))",
           "queryType": "instant",
           "legendFormat": "place_order"
         },
@@ -557,7 +557,7 @@
             "uid": "loki"
           },
           "refId": "G",
-          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"order_confirmed\" | journey_outcome=\"success\" [$__range])))",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" | journey_outcome=\"success\" [$__range])))",
           "queryType": "instant",
           "legendFormat": "order_confirmed"
         }
@@ -695,7 +695,7 @@
             "uid": "loki"
           },
           "refId": "A",
-          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"browse\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))) * 100",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"browse\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
           "queryType": "instant",
           "legendFormat": "browse"
         },
@@ -705,7 +705,7 @@
             "uid": "loki"
           },
           "refId": "B",
-          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"view_product\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))) * 100",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"view_product\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
           "queryType": "instant",
           "legendFormat": "view_product"
         },
@@ -715,7 +715,7 @@
             "uid": "loki"
           },
           "refId": "C",
-          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"add_to_cart\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))) * 100",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"add_to_cart\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
           "queryType": "instant",
           "legendFormat": "add_to_cart"
         },
@@ -725,7 +725,7 @@
             "uid": "loki"
           },
           "refId": "D",
-          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"view_cart\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))) * 100",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"view_cart\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
           "queryType": "instant",
           "legendFormat": "view_cart"
         },
@@ -735,7 +735,7 @@
             "uid": "loki"
           },
           "refId": "E",
-          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"begin_checkout\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))) * 100",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"begin_checkout\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
           "queryType": "instant",
           "legendFormat": "begin_checkout"
         },
@@ -745,7 +745,7 @@
             "uid": "loki"
           },
           "refId": "F",
-          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"place_order\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))) * 100",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"place_order\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
           "queryType": "instant",
           "legendFormat": "place_order"
         },
@@ -755,7 +755,7 @@
             "uid": "loki"
           },
           "refId": "G",
-          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_step=\"order_confirmed\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" [$__range])))) * 100",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
           "queryType": "instant",
           "legendFormat": "order_confirmed"
         }
@@ -895,7 +895,7 @@
             "uid": "metrics"
           },
           "refId": "A",
-          "expr": "sum by (journey_step) (increase(shop_journey_steps_total{job=\"$ns/$app\",journey_outcome=\"success\"}[5m]))",
+          "expr": "sum by (journey_step) (increase(journey_steps_total{job=\"$ns/$app\",journey_name=\"$journey\",journey_outcome=\"success\"}[5m]))",
           "instant": false,
           "range": true,
           "legendFormat": "{{journey_step}}"
@@ -952,7 +952,7 @@
             "uid": "metrics"
           },
           "refId": "A",
-          "expr": "sum by (journey_error_reason) (increase(shop_journey_steps_total{job=\"$ns/$app\",journey_step=\"place_order\",journey_outcome=\"failure\"}[5m]))",
+          "expr": "sum by (journey_error_reason) (increase(journey_steps_total{job=\"$ns/$app\",journey_name=\"$journey\",journey_step=\"place_order\",journey_outcome=\"failure\"}[5m]))",
           "instant": false,
           "range": true,
           "legendFormat": "{{journey_error_reason}}"
@@ -1009,7 +1009,7 @@
             "uid": "metrics"
           },
           "refId": "A",
-          "expr": "sum by (journey_error_reason) (increase(shop_journey_steps_total{job=\"$ns/$app\",journey_outcome=\"failure\"}[$__range]))",
+          "expr": "sum by (journey_error_reason) (increase(journey_steps_total{job=\"$ns/$app\",journey_name=\"$journey\",journey_outcome=\"failure\"}[$__range]))",
           "instant": true,
           "range": false,
           "legendFormat": "{{journey_error_reason}}"
@@ -1781,6 +1781,18 @@
   ],
   "templating": {
     "list": [
+      {
+        "name": "journey",
+        "label": "Journey",
+        "type": "custom",
+        "query": "checkout",
+        "current": {
+          "text": "checkout",
+          "value": "checkout"
+        },
+        "options": [],
+        "hide": 0
+      },
       {
         "name": "app",
         "label": "App",

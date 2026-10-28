@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
-import { TrackJourneyStep } from "@/components/TrackJourneyStep";
+import { checkoutJourney } from "@/lib/journeys";
 import { formatPrice, getProduct } from "@/lib/products";
+import { TrackJourneyStep } from "@/observability/journey-client";
 
 export default async function ProductPage({ params }: PageProps<"/products/[id]">) {
   const { id } = await params;
@@ -12,6 +13,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[id]"
   return (
     <article className="product">
       <TrackJourneyStep
+        journey={checkoutJourney}
         step="view_product"
         attributes={{ product_id: product.id, category: product.category, price_usd: product.price / 100 }}
       />

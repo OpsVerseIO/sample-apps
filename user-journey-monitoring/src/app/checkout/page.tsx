@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useCart } from "@/components/CartProvider";
-import { trackJourneyStep } from "@/lib/journey";
+import { checkoutJourney } from "@/lib/journeys";
 import { formatPrice } from "@/lib/products";
+import { trackJourneyStep, useJourneyStep } from "@/observability/journey-client";
 
 const ERROR_MESSAGES: Record<string, string> = {
   payment_declined: "Your payment was declined. Please try another card.",
@@ -19,13 +20,10 @@ export default function CheckoutPage() {
   const { cart, loading, refresh } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const tracked = useRef(false);
-
-  useEffect(() => {
-    if (loading || tracked.current || cart.items.length === 0) return;
-    tracked.current = true;
-    trackJourneyStep("begin_checkout", "success", { item_count: cart.itemCount, cart_value_usd: cart.total / 100 });
-  }, [loading, cart]);
+  useJourneyStep(checkoutJourney, "begin_checkout", {
+    when: !loading && cart.items.length > 0,
+    attributes: { item_count: cart.itemCount, cart_value_usd: cart.total / 100 },
+  });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,18 +47,18 @@ export default function CheckoutPage() {
       const data = await res.json();
       const cartValue = cart.total / 100;
       if (!res.ok) {
-        trackJourneyStep("place_order", "failure", {
+        trackJourneyStep(checkoutJourney, "place_order", "failure", {
           error_reason: data.reason ?? data.error ?? `http_${res.status}`,
           cart_value_usd: cartValue,
         });
         setError(ERROR_MESSAGES[data.error] ?? "Something went wrong. Please try again.");
         return;
       }
-      trackJourneyStep("place_order", "success", { order_id: data.orderId, cart_value_usd: cartValue });
+      trackJourneyStep(checkoutJourney, "place_order", "success", { order_id: data.orderId, cart_value_usd: cartValue });
       await refresh();
       router.push(`/orders/${data.orderId}`);
     } catch {
-      trackJourneyStep("place_order", "failure", { error_reason: "network_error" });
+      trackJourneyStep(checkoutJourney, "place_order", "failure", { error_reason: "network_error" });
       setError("Network error. Please try again.");
     } finally {
       setSubmitting(false);

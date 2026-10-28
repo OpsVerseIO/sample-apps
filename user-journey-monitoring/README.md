@@ -11,6 +11,10 @@ Grafana dashboards.
 
 - Grafana Faro (browser) + OpenTelemetry Node SDK (server) -> OTel Collector (contrib)
 
+**Instrumenting your own app?** See [INSTRUMENTATION.md](INSTRUMENTATION.md) for a
+step-by-step guide to the reusable kit in `src/observability/`, the journey event
+contract, and the gotchas we hit.
+
 **How to run**
 
 ```
@@ -38,10 +42,10 @@ translates it into OTLP logs (events, errors, Web Vitals) and traces.
 
 | Signal | Source | What you get |
 | --- | --- | --- |
-| `shop_journey_steps_total{journey_step,journey_outcome,journey_error_reason}` | Faro `journey_step` events → `count` connector | Funnel, drop-off, decline rates |
+| `journey_steps_total{journey_name,journey_step,journey_outcome,journey_error_reason}` | Faro `journey_step` events → `count` connector | Funnel, drop-off, decline rates |
 | `traces_span_metrics_*` | All spans → `spanmetrics` connector | RED metrics per route / span |
 | `shop_checkout_attempts_total`, `shop_order_value`, `shop_payment_duration`, `shop_cart_additions_total` | Server OTel metrics | Business KPIs |
-| Logs with `session.id`, `journey.step` attributes | Faro → collector | Per-session drilldown |
+| Logs with `session.id`, `journey.name`, `journey.step` attributes | Faro → collector | Per-session drilldown |
 | Traces | Faro fetch spans + Next.js route spans (joined via `traceparent`) | Click → API → payment in one trace |
 
 Destination is controlled entirely by env vars in `.env` — see `.env.example`
