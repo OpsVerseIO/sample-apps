@@ -35,7 +35,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- initial fetch
-    refresh();
+    refresh().catch(() => {
+      // Aborted (e.g. page navigated away) or network error: show an empty cart.
+      setLoading(false);
+    });
   }, [refresh]);
 
   const addItem = useCallback(async (productId: string, quantity = 1) => {
