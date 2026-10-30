@@ -26,6 +26,10 @@ $ npm run dev
 // Visit http://localhost:3000 and walk through a purchase
 ```
 
+To generate realistic traffic (random sessions that bounce, abandon carts, get
+declined or buy), run `npm run simulate -- 20` while the app is running. It drives
+your local Google Chrome with Playwright.
+
 ## Telemetry flow
 
 ```
