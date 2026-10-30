@@ -1,0 +1,1138 @@
+{
+  "uid": "uj-session",
+  "title": "User Journey Session Drilldown",
+  "tags": [
+    "user-journey",
+    "faro",
+    "otel"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 24,
+      "type": "row",
+      "title": "Sessions",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 25,
+      "type": "table",
+      "title": "Recent sessions",
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "B",
+          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_outcome=\"failure\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "C",
+          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "D",
+          "expr": "count by (session_id) (count_over_time({service_name=\"$app\"} | kind=\"exception\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Journey events",
+            "desc": true
+          }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Session"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open session",
+                    "url": "/d/uj-session/user-journey-session-drilldown?var-session=${__value.raw}&${__url_time_range}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed steps"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Orders"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "session_id": "Session",
+              "Value #A": "Journey events",
+              "Value #B": "Failed steps",
+              "Value #C": "Orders",
+              "Value #D": "JS errors"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "type": "row",
+      "title": "Session: $session",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 27,
+      "type": "stat",
+      "title": "Journey events",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | session_id=\"$session\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 28,
+      "type": "stat",
+      "title": "Failed steps",
+      "gridPos": {
+        "x": 4,
+        "y": 9,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | session_id=\"$session\" | journey_outcome=\"failure\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 29,
+      "type": "stat",
+      "title": "Orders",
+      "gridPos": {
+        "x": 8,
+        "y": 9,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | session_id=\"$session\" | journey_step=\"order_confirmed\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 30,
+      "type": "stat",
+      "title": "JS errors",
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | session_id=\"$session\" | kind=\"exception\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 31,
+      "type": "stat",
+      "title": "Dead/rage clicks",
+      "gridPos": {
+        "x": 16,
+        "y": 9,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | session_id=\"$session\" | event_name=~\"faro.frustration.*\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 32,
+      "type": "stat",
+      "title": "Page views",
+      "gridPos": {
+        "x": 20,
+        "y": 9,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "sum(count_over_time({service_name=\"$app\"} | session_id=\"$session\" | event_name=~\"faro.performance.navigation|view_changed\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 33,
+      "type": "logs",
+      "title": "Journey timeline",
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 10,
+        "h": 11
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "{service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | session_id=\"$session\" | line_format \"{{.journey_step}}  {{ if eq .journey_outcome \\\"failure\\\" }}\u2717 FAILED ({{.journey_error_reason}}){{ else }}\u2713{{ end }}\"",
+          "queryType": "range",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Ascending",
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false,
+        "showCommonLabels": false
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 34,
+      "type": "logs",
+      "title": "All session activity",
+      "gridPos": {
+        "x": 10,
+        "y": 13,
+        "w": 14,
+        "h": 11
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "{service_name=\"$app\"} | session_id=\"$session\" | event_name!=\"faro.performance.resource\" | logfmt | line_format \"{{.kind}} {{.event_name}}{{.type}} {{.message}}{{.value}} {{.event_data_toView}} {{.event_data_http_url}}{{.event_data_target}}\"",
+          "queryType": "range",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Ascending",
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false,
+        "showCommonLabels": false
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 35,
+      "type": "table",
+      "title": "Traces (browser \u2192 server)",
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 14,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "jaeger",
+            "uid": "jaeger"
+          },
+          "refId": "A",
+          "queryType": "search",
+          "service": "$app",
+          "tags": "session.id=$session",
+          "limit": 50
+        }
+      ],
+      "datasource": {
+        "type": "jaeger",
+        "uid": "jaeger"
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Start time",
+            "desc": false
+          }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 36,
+      "type": "table",
+      "title": "Web Vitals (worst per page)",
+      "gridPos": {
+        "x": 14,
+        "y": 24,
+        "w": 10,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "max_over_time({service_name=\"$app\"} | session_id=\"$session\" | kind=\"measurement\" | logfmt | lcp!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap lcp [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "B",
+          "expr": "max_over_time({service_name=\"$app\"} | session_id=\"$session\" | kind=\"measurement\" | logfmt | inp!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap inp [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "C",
+          "expr": "max_over_time({service_name=\"$app\"} | session_id=\"$session\" | kind=\"measurement\" | logfmt | cls!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap cls [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "D",
+          "expr": "max_over_time({service_name=\"$app\"} | session_id=\"$session\" | kind=\"measurement\" | logfmt | fcp!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap fcp [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "E",
+          "expr": "max_over_time({service_name=\"$app\"} | session_id=\"$session\" | kind=\"measurement\" | logfmt | ttfb!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap ttfb [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "\u2013"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "LCP"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 2500
+                    },
+                    {
+                      "color": "red",
+                      "value": 4000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "INP"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 200
+                    },
+                    {
+                      "color": "red",
+                      "value": 500
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CLS"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 0.1
+                    },
+                    {
+                      "color": "red",
+                      "value": 0.25
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FCP"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1800
+                    },
+                    {
+                      "color": "red",
+                      "value": 3000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TTFB"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 800
+                    },
+                    {
+                      "color": "red",
+                      "value": 1800
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #A": "LCP",
+              "Value #B": "INP",
+              "Value #C": "CLS",
+              "Value #D": "FCP",
+              "Value #E": "TTFB",
+              "page": "Page"
+            },
+            "indexByName": {
+              "page": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "type": "logs",
+      "title": "Errors and console output",
+      "gridPos": {
+        "x": 0,
+        "y": 33,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "{service_name=\"$app\"} | session_id=\"$session\" | kind=~\"exception|log\" | logfmt | line_format \"[{{.kind}}] {{.level}} {{.type}}{{.message}}{{.value}}  \u00b7  {{.page_url}}\"",
+          "queryType": "range",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Ascending",
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false,
+        "showCommonLabels": false
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "journey",
+        "label": "Journey",
+        "type": "custom",
+        "query": "checkout",
+        "current": {
+          "text": "checkout",
+          "value": "checkout"
+        },
+        "options": [],
+        "hide": 0
+      },
+      {
+        "name": "app",
+        "label": "App",
+        "type": "custom",
+        "query": "shop-web",
+        "current": {
+          "text": "shop-web",
+          "value": "shop-web"
+        },
+        "options": [],
+        "hide": 0
+      },
+      {
+        "name": "ns",
+        "label": "Namespace",
+        "type": "custom",
+        "query": "observable-outfitters",
+        "current": {
+          "text": "observable-outfitters",
+          "value": "observable-outfitters"
+        },
+        "options": [],
+        "hide": 0
+      },
+      {
+        "name": "session",
+        "label": "Session ID",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "hide": 0
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "User Journey",
+      "type": "dashboards",
+      "tags": [
+        "user-journey"
+      ],
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "annotations": {
+    "list": []
+  }
+}

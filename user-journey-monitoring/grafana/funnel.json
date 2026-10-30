@@ -1,0 +1,1837 @@
+{
+  "uid": "uj-funnel",
+  "title": "User Journey Funnel",
+  "tags": [
+    "user-journey",
+    "faro",
+    "otel"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Sessions",
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Orders",
+      "gridPos": {
+        "x": 4,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Conversion",
+      "gridPos": {
+        "x": 8,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
+          "queryType": "instant",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 1
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Checkout success",
+      "gridPos": {
+        "x": 12,
+        "y": 1,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "sum(increase(shop_checkout_attempts_total{job=\"$ns/shop-server\",outcome=\"success\"}[$__range])) / sum(increase(shop_checkout_attempts_total{job=\"$ns/shop-server\"}[$__range])) * 100",
+          "instant": true,
+          "range": false,
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "decimals": 1
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Revenue",
+      "gridPos": {
+        "x": 16,
+        "y": 1,
+        "w": 3,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "sum(increase(shop_order_value_USD_sum{job=\"$ns/shop-server\"}[$__range]))",
+          "instant": true,
+          "range": false,
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Avg order value",
+      "gridPos": {
+        "x": 19,
+        "y": 1,
+        "w": 2,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "sum(increase(shop_order_value_USD_sum{job=\"$ns/shop-server\"}[$__range])) / sum(increase(shop_order_value_USD_count{job=\"$ns/shop-server\"}[$__range]))",
+          "instant": true,
+          "range": false,
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "p95 payment",
+      "gridPos": {
+        "x": 21,
+        "y": 1,
+        "w": 3,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (increase(shop_payment_duration_seconds_bucket{job=\"$ns/shop-server\"}[$__range])))",
+          "instant": true,
+          "range": false,
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "Funnel",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 10,
+      "type": "bargauge",
+      "title": "Sessions reaching each step",
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"browse\" | journey_outcome=\"success\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": "browse"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "B",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"view_product\" | journey_outcome=\"success\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": "view_product"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "C",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"add_to_cart\" | journey_outcome=\"success\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": "add_to_cart"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "D",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"view_cart\" | journey_outcome=\"success\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": "view_cart"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "E",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"begin_checkout\" | journey_outcome=\"success\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": "begin_checkout"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "F",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"place_order\" | journey_outcome=\"success\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": "place_order"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "G",
+          "expr": "count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" | journey_outcome=\"success\" [$__range])))",
+          "queryType": "instant",
+          "legendFormat": "order_confirmed"
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "valueMode": "text",
+        "namePlacement": "left",
+        "sizing": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlPu"
+          },
+          "min": 0,
+          "noValue": "0",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "browse"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "view_product"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "add_to_cart"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "view_cart"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "begin_checkout"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "F"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "place_order"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "G"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "order_confirmed"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "type": "bargauge",
+      "title": "% of sessions reaching each step",
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"browse\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
+          "queryType": "instant",
+          "legendFormat": "browse"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "B",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"view_product\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
+          "queryType": "instant",
+          "legendFormat": "view_product"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "C",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"add_to_cart\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
+          "queryType": "instant",
+          "legendFormat": "add_to_cart"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "D",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"view_cart\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
+          "queryType": "instant",
+          "legendFormat": "view_cart"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "E",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"begin_checkout\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
+          "queryType": "instant",
+          "legendFormat": "begin_checkout"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "F",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"place_order\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
+          "queryType": "instant",
+          "legendFormat": "place_order"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "G",
+          "expr": "(count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" | journey_step=\"order_confirmed\" | journey_outcome=\"success\" [$__range])))) / (count(count by (session_id) (count_over_time({service_name=\"$app\"} | event_name=\"journey_step\" | journey_name=\"$journey\" [$__range])))) * 100",
+          "queryType": "instant",
+          "legendFormat": "order_confirmed"
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "valueMode": "text",
+        "namePlacement": "left",
+        "sizing": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "continuous-RdYlGr"
+          },
+          "min": 0,
+          "noValue": "0",
+          "decimals": 0,
+          "max": 100
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "browse"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "view_product"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "add_to_cart"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "view_cart"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "begin_checkout"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "F"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "place_order"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "G"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "order_confirmed"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Journey steps (5m)",
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "sum by (journey_step) (increase(journey_steps_total{job=\"$ns/$app\",journey_name=\"$journey\",journey_outcome=\"success\"}[5m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "{{journey_step}}"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "place_order failures by reason (5m)",
+      "gridPos": {
+        "x": 12,
+        "y": 15,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "sum by (journey_error_reason) (increase(journey_steps_total{job=\"$ns/$app\",journey_name=\"$journey\",journey_step=\"place_order\",journey_outcome=\"failure\"}[5m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "{{journey_error_reason}}"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 14,
+      "type": "bargauge",
+      "title": "Failure reasons",
+      "gridPos": {
+        "x": 20,
+        "y": 15,
+        "w": 4,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "sum by (journey_error_reason) (increase(journey_steps_total{job=\"$ns/$app\",journey_name=\"$journey\",journey_outcome=\"failure\"}[$__range]))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{journey_error_reason}}"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "valueMode": "text",
+        "namePlacement": "left",
+        "sizing": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-reds"
+          },
+          "min": 0,
+          "noValue": "0",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "${__field.labels.journey_error_reason}"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "type": "row",
+      "title": "Checkout & payments (server)",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "Checkout attempts by outcome (5m)",
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "sum by (outcome, error_reason) (increase(shop_checkout_attempts_total{job=\"$ns/shop-server\"}[5m]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "{{outcome}} \u00b7 {{error_reason}}"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "Payment latency",
+      "gridPos": {
+        "x": 8,
+        "y": 24,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(shop_payment_duration_seconds_bucket{job=\"$ns/shop-server\"}[5m])))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "p50"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(shop_payment_duration_seconds_bucket{job=\"$ns/shop-server\"}[5m])))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "p95"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "C",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(shop_payment_duration_seconds_bucket{job=\"$ns/shop-server\"}[5m])))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "p99"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 18,
+      "type": "bargauge",
+      "title": "Cart additions by product",
+      "gridPos": {
+        "x": 16,
+        "y": 24,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "metrics"
+          },
+          "refId": "A",
+          "expr": "sum by (product_id) (increase(shop_cart_additions_total{job=\"$ns/shop-server\"}[$__range]))",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{product_id}}"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "metrics"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "valueMode": "text",
+        "namePlacement": "left",
+        "sizing": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlPu"
+          },
+          "min": 0,
+          "noValue": "0",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "${__field.labels.product_id}"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 19,
+      "type": "row",
+      "title": "Frontend experience",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 20,
+      "type": "table",
+      "title": "Web Vitals p75 by page",
+      "gridPos": {
+        "x": 0,
+        "y": 33,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "quantile_over_time(0.75, {service_name=\"$app\"} | kind=\"measurement\" | logfmt | lcp!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap lcp [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "B",
+          "expr": "quantile_over_time(0.75, {service_name=\"$app\"} | kind=\"measurement\" | logfmt | inp!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap inp [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "C",
+          "expr": "quantile_over_time(0.75, {service_name=\"$app\"} | kind=\"measurement\" | logfmt | cls!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap cls [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "D",
+          "expr": "quantile_over_time(0.75, {service_name=\"$app\"} | kind=\"measurement\" | logfmt | fcp!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap fcp [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "E",
+          "expr": "quantile_over_time(0.75, {service_name=\"$app\"} | kind=\"measurement\" | logfmt | ttfb!=\"\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` | unwrap ttfb [$__range]) by (page)",
+          "queryType": "instant",
+          "legendFormat": "",
+          "format": "table"
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "\u2013"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "LCP"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 2500
+                    },
+                    {
+                      "color": "red",
+                      "value": 4000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "INP"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 200
+                    },
+                    {
+                      "color": "red",
+                      "value": 500
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CLS"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 0.1
+                    },
+                    {
+                      "color": "red",
+                      "value": 0.25
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FCP"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1800
+                    },
+                    {
+                      "color": "red",
+                      "value": 3000
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TTFB"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 800
+                    },
+                    {
+                      "color": "red",
+                      "value": 1800
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #A": "LCP",
+              "Value #B": "INP",
+              "Value #C": "CLS",
+              "Value #D": "FCP",
+              "Value #E": "TTFB",
+              "page": "Page"
+            },
+            "indexByName": {
+              "page": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "bargauge",
+      "title": "JS errors by page",
+      "gridPos": {
+        "x": 12,
+        "y": 33,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "sum by (page) (count_over_time({service_name=\"$app\"} | kind=\"exception\" | label_format page=`{{ regexReplaceAll \"/products/[^/?#]+\" (regexReplaceAll \"/orders/[^/?#]+\" (regexReplaceAll \"[?#].*$\" (regexReplaceAll \"^https?://[^/]+\" .page_url \"\") \"\") \"/orders/:id\") \"/products/:id\" }}` [$__range]))",
+          "queryType": "instant",
+          "legendFormat": "{{page}}"
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "valueMode": "text",
+        "namePlacement": "left",
+        "sizing": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-reds"
+          },
+          "min": 0,
+          "noValue": "0",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "${__field.labels.page}"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 22,
+      "type": "bargauge",
+      "title": "Frustration signals",
+      "gridPos": {
+        "x": 18,
+        "y": 33,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "sum by (event_name) (count_over_time({service_name=\"$app\"} | event_name=~\"faro.frustration.*\" [$__range]))",
+          "queryType": "instant",
+          "legendFormat": "{{event_name}}"
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true,
+        "valueMode": "text",
+        "namePlacement": "left",
+        "sizing": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlRd"
+          },
+          "min": 0,
+          "noValue": "0",
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "${__field.labels.event_name}"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 23,
+      "type": "logs",
+      "title": "Exceptions and console warnings/errors",
+      "gridPos": {
+        "x": 0,
+        "y": 41,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "refId": "A",
+          "expr": "{service_name=\"$app\"} | kind=~\"exception|log\" | logfmt | kind=\"exception\" or level=~\"warn|error\" | line_format \"[{{.kind}}] {{.level}} {{.type}}{{.message}}{{.value}}  \u00b7  {{.page_url}}  \u00b7  session={{.session_id}}\"",
+          "queryType": "range",
+          "legendFormat": ""
+        }
+      ],
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Ascending",
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false,
+        "showCommonLabels": false
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "journey",
+        "label": "Journey",
+        "type": "custom",
+        "query": "checkout",
+        "current": {
+          "text": "checkout",
+          "value": "checkout"
+        },
+        "options": [],
+        "hide": 0
+      },
+      {
+        "name": "app",
+        "label": "App",
+        "type": "custom",
+        "query": "shop-web",
+        "current": {
+          "text": "shop-web",
+          "value": "shop-web"
+        },
+        "options": [],
+        "hide": 0
+      },
+      {
+        "name": "ns",
+        "label": "Namespace",
+        "type": "custom",
+        "query": "observable-outfitters",
+        "current": {
+          "text": "observable-outfitters",
+          "value": "observable-outfitters"
+        },
+        "options": [],
+        "hide": 0
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "User Journey",
+      "type": "dashboards",
+      "tags": [
+        "user-journey"
+      ],
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "annotations": {
+    "list": []
+  }
+}

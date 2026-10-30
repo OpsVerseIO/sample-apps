@@ -1,0 +1,155 @@
+# OTel Collector (contrib) for user journey monitoring.
+#
+#   Browser (Faro SDK)  --faro/json-->  receiver "faro"  :8027
+#   Next.js (OTel SDK)  --OTLP------->  receiver "otlp"  :4317 / :4318
+#
+# Everything is forwarded upstream over OTLP/HTTP. Set the destination in .env:
+#   UPSTREAM_OTLP_ENDPOINT, UPSTREAM_AUTHORIZATION (see ../.env.example).
+# Without .env it sends to the optional local Grafana stack
+# (docker compose --profile local up).
+
+receivers:
+  faro:
+    endpoint: 0.0.0.0:8027
+    cors:
+      allowed_origins: ${env:FARO_ALLOWED_ORIGINS:-[http://localhost:3000]}
+      # Every header the Faro fetch transport may send must be listed, or the
+      # browser preflight fails (nothing is implicitly allowed once this is set).
+      allowed_headers: [content-type, content-encoding, idempotency-key, x-api-key, x-faro-session-id]
+
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 20
+
+  batch: {}
+
+  # The count connector emits delta sums; Prometheus-style backends need
+  # cumulative. Safe with N collector replicas because each series also gets
+  # a per-collector service.instance.id (below), so replicas never collide.
+  deltatocumulative: {}
+
+  resource/collector_instance:
+    attributes:
+      - key: service.instance.id
+        value: ${env:HOSTNAME:-otel-collector}
+        action: insert # keep the app's own id when it has one
+
+  # Faro signals arrive as logfmt bodies with a `kind` attribute
+  # (event | log | exception | measurement), e.g.
+  #   kind=event event_name=journey_step event_data_step=place_order ... session_id=abc
+  #   kind=log level=warn message="..." ... session_id=abc
+  # Lift the useful keys into attributes so they can be counted and queried.
+  transform/faro_events:
+    error_mode: ignore
+    log_statements:
+      # Common context on every Faro log, so console logs, exceptions and
+      # Web Vitals line up with journey steps in the session drilldown.
+      - context: log
+        conditions:
+          - attributes["kind"] != nil
+        statements:
+          - merge_maps(cache, ParseKeyValue(body, "=", " "), "upsert")
+          - set(attributes["session.id"], cache["session_id"])
+          - set(attributes["page.url"], cache["page_url"])
+          - set(attributes["view.name"], cache["view_name"])
+      # Console logs: map the level to severity so Grafana colours them.
+      - context: log
+        conditions:
+          - attributes["kind"] == "log"
+        statements:
+          - merge_maps(cache, ParseKeyValue(body, "=", " "), "upsert")
+          - set(attributes["log.level"], cache["level"])
+          - set(severity_text, cache["level"])
+          - set(severity_number, SEVERITY_NUMBER_INFO) where cache["level"] == "info"
+          - set(severity_number, SEVERITY_NUMBER_WARN) where cache["level"] == "warn"
+          - set(severity_number, SEVERITY_NUMBER_ERROR) where cache["level"] == "error"
+      # Journey events.
+      - context: log
+        conditions:
+          - attributes["kind"] == "event"
+        statements:
+          - merge_maps(cache, ParseKeyValue(body, "=", " "), "upsert")
+          - set(attributes["event.name"], cache["event_name"])
+          - set(attributes["event.domain"], cache["event_domain"])
+          - set(attributes["journey.name"], cache["event_data_journey"])
+          - set(attributes["journey.step"], cache["event_data_step"])
+          - set(attributes["journey.outcome"], cache["event_data_outcome"])
+          - set(attributes["journey.error_reason"], cache["event_data_error_reason"])
+
+connectors:
+  # journey_step events -> journey.steps counter (journey_steps_total in
+  # Prometheus). Drives the funnel / drop-off / decline-rate panels.
+  count/journey:
+    logs:
+      journey.steps:
+        description: User journey steps reached, by journey, step and outcome
+        conditions:
+          - attributes["event.name"] == "journey_step"
+        attributes:
+          - key: journey.name
+          - key: journey.step
+          - key: journey.outcome
+          - key: journey.error_reason
+            default_value: none
+
+  # RED metrics for both browser spans (Faro fetch/document-load) and server
+  # spans (Next.js route handlers, checkout.validate, payment.charge).
+  spanmetrics:
+    histogram:
+      explicit:
+        buckets: [50ms, 100ms, 250ms, 500ms, 1s, 2s, 3s, 5s, 10s]
+    dimensions:
+      - name: http.route
+      - name: http.method
+      - name: http.status_code
+      - name: checkout.outcome
+    resource_metrics_key_attributes: [service.name]
+
+exporters:
+  # ObserveNow, Grafana Cloud, or any OTLP/HTTP endpoint.
+  otlphttp/upstream:
+    endpoint: ${env:UPSTREAM_OTLP_ENDPOINT:-http://lgtm:4318}
+    headers:
+      Authorization: ${env:UPSTREAM_AUTHORIZATION:-}
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp, faro]
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp/upstream]
+
+    # Traces also feed spanmetrics (unbatched copy, before export).
+    traces/spanmetrics:
+      receivers: [otlp, faro]
+      processors: [memory_limiter]
+      exporters: [spanmetrics]
+
+    logs:
+      receivers: [otlp, faro]
+      processors: [memory_limiter, transform/faro_events, batch]
+      exporters: [otlphttp/upstream]
+
+    logs/journey:
+      receivers: [faro]
+      processors: [memory_limiter, transform/faro_events]
+      exporters: [count/journey]
+
+    metrics:
+      receivers: [otlp, spanmetrics, count/journey]
+      processors: [memory_limiter, resource/collector_instance, deltatocumulative, batch]
+      exporters: [otlphttp/upstream]
