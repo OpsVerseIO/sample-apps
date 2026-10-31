@@ -199,18 +199,32 @@ Also check the browser console: CORS errors or `Delivery retries exhausted` from
 
 ## Gotchas
 
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| Collector crash-loops: `unable to infer context from statements` | OTTL statements without a context (collector ≥ 0.159) | `context: log` on each `log_statements` group |
-| No browser data; console shows CORS errors | `allowed_headers` missing `content-type` or `idempotency-key` (Faro 2.x sends both) | Use the full header list above |
-| Funnel metric never appears in Prometheus | Delta counter dropped by remote write | `deltatocumulative` processor |
-| Loki gets slow / stream explosion | `session_id` used as an index label | Keep it as structured metadata |
-| Metric series collide with several replicas | Same resource identity per replica | Unique `service.instance.id` (the kit sets host + pid) |
-| Grafana bars show `Value #A` | Loki instant queries ignore legend names | Set display names via field overrides |
-| `job` label is `observable-outfitters/shop-server` | Prometheus `job` = `service.namespace/service.name` | Match on the full value |
-| Jaeger span names are lowercase (`post /api/checkout`) | Backend ingests traces via Zipkin | Search lowercase |
-| Steps tracked twice in dev | React StrictMode runs effects twice | The kit's hooks guard against it |
-| `view_name` empty on the first page load | Faro sets the view on navigation only | Group by `page_url` (normalised) instead |
+**When you deploy** — these are not handled for you:
+
+| Check | Why |
+| --- | --- |
+| Faro receiver `cors.allowed_origins` lists your real app origin(s) | Otherwise browsers silently drop all Faro data |
+| The Faro endpoint is reachable from users' browsers, with TLS and rate limits | Browser telemetry can't carry secrets, so it is unauthenticated |
+| `NEXT_PUBLIC_FARO_COLLECTOR_URL` is set at **build** time | `NEXT_PUBLIC_*` values are inlined into the browser bundle |
+| Your Loki keeps `session_id` as structured metadata, not an index label | Indexing it creates one stream per session |
+
+**Already handled** — don't undo these:
+
+| Symptom if undone | Fix in place |
+| --- | --- |
+| Collector crash-loops: `unable to infer context from statements` | `context: log` on each `transform/faro_events` group |
+| No browser data; console shows CORS errors | Full `allowed_headers` list (Faro 2.x sends `content-type` and `idempotency-key`) |
+| Funnel metric never reaches Prometheus | `deltatocumulative` before the metrics exporter |
+| Metric series collide across replicas | Unique `service.instance.id` per process (set by the kit) |
+| Steps counted twice in dev | `useJourneyStep` guards against StrictMode's double effects |
+| Dev server reloads the page in a loop | `logging.browserToTerminal: false` in `next.config.ts` (forwarded browser logs land in `.next/dev/logs` and re-trigger Fast Refresh); `turbopack.root` is pinned too |
+
+**When writing your own queries**:
+
+- The Prometheus `job` label is `service.namespace/service.name` (e.g. `observable-outfitters/shop-server`).
+- Loki instant queries ignore legend names (bars show `Value #A`); set display names with field overrides.
+- Faro's `view_name` is empty on the first page load; group by `page_url` instead.
+- Backends that ingest traces via Zipkin (e.g. Jaeger) lowercase span names: `post /api/checkout`.
 
 ## Outside Next.js
 
